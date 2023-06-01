@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+  <h1>레시피 추천</h1>
+  <div id="result"></div>
+  <div id="nxny"></div>
+  <div id="pay"></div>
+
+  <button id="weatherButton" onclick="getWeatherInfo()">날씨 정보 가져오기</button>
+
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+  <script>
+    function getWeatherInfo() {
+      var weatherButton = document.getElementById("weatherButton");
+      weatherButton.style.display = "none";
+
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          var latitude = position.coords.latitude;
+          var longitude = position.coords.longitude;
+
+          var nx = parseInt(latitude, 10);
+          var ny = parseInt(longitude, 10);
+
+          const villageWeatherUrl = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?";
+          const serviceKey = "fKIAUimoXsQG2qWxxgMYaAyeifCXgeEqihWVX2AedUJgd4h%2Bu%2BscaKq3DUSik6vE%2FwbRzFou8nQ4sb7GPX4OBg%3D%3D";
+          const baseDate = moment().format("YYYYMMDD"); 
+          const baseTime = "1700";
+
+          const payload = `serviceKey=${serviceKey}&dataType=json&base_date=${baseDate}&base_time=${baseTime}&nx=${nx}&ny=${ny}`;
+
+          axios.get(villageWeatherUrl + payload)
+            .then(response => {
+              const items = response.data.response.body.items.item;
+
+              let weatherData = {};
+              for (let i = 0; i < items.length; i++) {
+                let item = items[i];
+
+                if (item['category'] === 'TMP') {
+                  let weatherTmp = item['fcstValue'];
+                  let weatherWhat;
+
+                  if (weatherTmp >= 25) {
+                    weatherWhat = '더운';
+                  } else if (weatherTmp <= 5) {
+                    weatherWhat = '추운';
+                  } else {
+                    weatherWhat = '따듯한';
+                  }
+
+                  weatherData['What'] = weatherWhat;
+                }
+
+                if (item['category'] === 'PTY') {
+                  let weatherCode = item['fcstValue'];
+                  let weatherState;
+
+                  switch (weatherCode) {
+                    case '1':
+                      weatherState = '비';
+                      break;
+                    case '2':
+                      weatherState = '비 눈';
+                      break;
+                    case '3':
+                      weatherState = '눈';
+                      break;
+                    case '4':
+                      weatherState = '소나기';
+                      break;
+                    default:
+                      weatherState = '맑음';
+                      break;
+                  }
+
+                  weatherData['State'] = weatherState;
+                }
+              }
+
+
+              var dataset = weatherData['What'] + ' ' + weatherData['State'];
+              console.log(dataset);
+              performSearch(dataset);
+            })
+            .catch(error => {
+              console.log("날씨 정보 요청 실패: ", error.response?.data);
+            });
+        });
+      } else {
+        console.log("Geolocation을 지원하지 않는 브라우저입니다.");
+      }
+    }
+
+    function performSearch(dataset) {
+      var searchUrl = "https://www.10000recipe.com/recipe/list.html?q=" + encodeURIComponent(dataset);
+      window.location.href = searchUrl;
+    }
+  </script>
+</body>
+</html>
