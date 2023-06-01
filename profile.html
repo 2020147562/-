@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Profile</title>
+    <script>
+        // let submit_button = document.getElementById("submit_button");
+        // submit_button.addEventListener("click", function() {
+        //     createProfile();
+        //     //toMypage();
+        // });
+        function createProfile() {
+
+            // 사용자로부터 입력받은 정보 가져오기
+            let id = document.getElementById("id").value;
+            let password = document.getElementById("password").value;
+            let nickname = document.getElementById("nickname").value;
+            let cookingMethods = [];                                                                    // 이용 불가능한 조리방법들
+            let allergens = [];                                                                         // 우유, 계란, 대두, 키위, 땅콩, 새우 중 체크한 것들
+            let dietPreferences = [];                                                                   // 고단백 or 저염 or 저칼로리
+            let mbti = {};                                          
+
+            // 이용할 수 없는 조리 방법 가져오기
+            let cookingMethodCheckboxes = document.getElementsByName("cookingMethod");                  // 튀김, 부침, 굽기, 끓이기, 조림, 찜, 볶음, 절임
+            for (let i = 0; i < cookingMethodCheckboxes.length; i++) {                                  // 무침, 비빔, 데치기, 삶기 중 체크한 것들
+                if (cookingMethodCheckboxes[i].checked) {                                               // 이용 불가능한 조리방법을 체크한다.
+                    cookingMethods.push(cookingMethodCheckboxes[i].value);
+                }
+            }
+
+            // 알레르기 정보 가져오기
+            let allergenCheckboxes = document.getElementsByName("allergen");                            // 우유, 계란, 대두, 키위, 땅콩, 새우 중 체크한 것들
+            for (let i = 0; i < allergenCheckboxes.length; i++) {
+                if (allergenCheckboxes[i].checked) {
+                    allergens.push(allergenCheckboxes[i].value);
+                }
+            }
+
+            // 선호하는 식단 가져오기
+            let dietPreference = document.querySelector('input[name="dietPreference"]:checked').value;  // 고단백 or 저염 or 저칼로리
+
+            // 선호레시피 MBTI 정보 가져오기
+            mbti.riceOrWheat = document.querySelector('input[name="riceOrWheat"]:checked').value;       // rice or wheat
+            mbti.skillLevel = document.querySelector('input[name="skillLevel"]:checked').value;         // high or low
+            mbti.isVegeterain = document.querySelector('input[name="skillLevel"]:checked').value;       // yes or no
+            mbti.speed = document.querySelector('input[name="speed"]:checked').value;                   // fast or slow
+
+            // JSON 객체 생성
+            let profileData = {
+                id: id,
+                password: password,
+                nickname: nickname,
+                cookingMethods: cookingMethods,
+                allergens: allergens,
+                dietPreferences: dietPreferences,
+                mbti: mbti
+            };
+
+            // JSON 객체를 문자열로 변환
+            let jsonString = JSON.stringify(profileData);
+            
+            // 프로필 정보를 서버로 전송
+            fetch('/add-profile', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: jsonString
+            })
+              .then(response => {
+                if (response.ok) {
+                  return response.text();
+                } else {
+                  throw new Error('서버 응답 에러');
+                }
+              })
+              .then(data => {
+                console.log(data); // 서버에서 반환한 응답 데이터 출력
+                window.alert(data);
+              })
+              .catch(error => {
+                console.error(error); // 에러 처리
+                window.alert(error);
+              });       
+
+        }
+
+        // 회원가입 제출버튼을 누른 후에 myPage를 전송해달라고 요청함.
+        // function toMypage() {
+        //     fetch('/toMypage', {
+        //         method: 'POST'
+        //     })
+        //     .then(response => {
+        //         if(response.ok) {
+        //             return response.text();
+        //         }
+        //         else {
+        //             throw new Error('서버 응답 에러');
+        //         }
+        //     })
+        //     .then(data => {
+        //         document.body.innerHTML = data;
+        //         window.alert(data);
+        //     })
+        //     .catch(error => {
+        //         console.error(error);
+        //     })
+        // }
+
+    </script>
+</head>
+<body>
+    <h2>User Profile</h2>
+    <form>
+        <label for="id">ID:</label>
+        <input type="text" id="id" required><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" required><br>
+
+        <label for="nickname">Nickname:</label>
+        <input type="text" id="nickname" required><br>
+
+        <fieldset>
+            <legend>Unavailable Cooking Methods:</legend>
+            <input type="checkbox" name="cookingMethod" value="튀김">튀김
+            <input type="checkbox" name="cookingMethod" value="부침">부침
+            <input type="checkbox" name="cookingMethod" value="굽기">굽기
+            <input type="checkbox" name="cookingMethod" value="끓이기">끓이기
+            <input type="checkbox" name="cookingMethod" value="조림">조림
+            <input type="checkbox" name="cookingMethod" value="찜">찜
+            <input type="checkbox" name="cookingMethod" value="볶음">볶음
+            <input type="checkbox" name="cookingMethod" value="절임">절임
+            <input type="checkbox" name="cookingMethod" value="무침">무침
+            <input type="checkbox" name="cookingMethod" value="비빔">비빔
+            <input type="checkbox" name="cookingMethod" value="데치기">데치기
+            <input type="checkbox" name="cookingMethod" value="삶기">삶기
+        </fieldset>
+
+        <fieldset>
+            <legend>Allergies:</legend>
+            <input type="checkbox" name="allergen" value="우유">우유
+            <input type="checkbox" name="allergen" value="계란">계란
+            <input type="checkbox" name="allergen" value="대두">대두
+            <input type="checkbox" name="allergen" value="키위">키위
+            <input type="checkbox" name="allergen" value="땅콩">땅콩
+            <input type="checkbox" name="allergen" value="새우">새우
+        </fieldset>
+
+        <fieldset>
+            <legend>Diet Preferences:</legend>
+            <input type="radio" name="dietPreference" value="고단백">고단백
+            <input type="radio" name="dietPreference" value="저염">저염
+            <input type="radio" name="dietPreference" value="저칼로리">저칼로리
+        </fieldset>
+
+        <fieldset>
+            <legend>MBTI Preferences:</legend>
+            <label for="riceOrWheat">쌀 vs 밀:</label>
+            <input type="radio" name="riceOrWheat" value="rice" required>쌀
+            <input type="radio" name="riceOrWheat" value="wheat">밀<br>
+
+            <label for="skillLevel">요잘알 vs 요알못:</label>
+            <input type="radio" name="skillLevel" value="high" required>요잘알
+            <input type="radio" name="skillLevel" value="low">요알못<br>
+
+            <label for="includeMeat">채식주의:</label>
+            <input type="radio" name="vegetarian" value="yes" required>Yes
+            <input type="radio" name="vegetarian" value="no">No<br>
+
+            <label for="speed">패스트푸드 vs 슬로푸드:</label>
+            <input type="radio" name="speed" value="fast" required>패스트푸드
+            <input type="radio" name="speed" value="slow">슬로푸드<br>
+        </fieldset>
+
+        <button type="button" onclick="createProfile()">Create Profile</button>
+    </form>
+</body>
+</html>
