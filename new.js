@@ -6,7 +6,7 @@ let number;
 let recomarray;
 
 
-fetch("/recipe.json", {
+fetch("/recipe2.json", {
     method: 'POST'
 })
     .then(response => response.json())
