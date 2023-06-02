@@ -1,0 +1,21 @@
+<script type="text/javascript" src="./board.js"></script>
+<div class="modal" role="dialog" style="top: 10%;">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><span id="titleType"></span></h5>
+        <i class="fa-solid fa-xmark" onclick="modalClose()" style="cursor: pointer;"></i>
+      </div>
+      <div class="modal-body">
+        <div class="input-group mb-3">
+          <input id="title" type="text" class="form-control" placeholder="요리명" aria-label="제목" aria-describedby="basic-addon1">
+        </div>
+        <textarea id="content" class="form-control" placeholder="내용" aria-label="With textarea" rows="10"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button id="modalButton" type="button" class="btn btn-primary" onclick="modalAction()"></button>
+        <button type="button" class="btn btn-secondary" onclick="modalClose()">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
