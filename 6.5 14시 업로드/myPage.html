@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<head>
+  <link rel="stylesheet" type="text/css" href="main.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+</head>
+<body>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+  <div class="titlemainlogo">
+    <div class="logotitle">
+      <img class="yumlogo" src="images/yum1.jpg">
+      <h2 class="page-title">Yummiverse</h2>
+      <img class="yumlogo" src="images/yum1.jpg">
+    </div>
+  </div>
+    <p class="minimbti"></p><!--여기에 개인 엠비티아이 정보-->
+    
+    <div class="howtorecom">
+      
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-header py-3">
+          <h4 class="my-0 fw-normal zz">Normal</h4>
+        </div>
+        <div class="card-body">
+          <img class="normalimg z" src="images/normal.png">
+          <a href="http://localhost:50000/recommendation.html"><button type="button" class="w-100 btn btn-lg btn-outline-primary">개인 정보를 통한 레시피 추천</button></a>
+        </div>
+      </div>
+      &nbsp;&nbsp;
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-header py-3">
+          <h4 class="my-0 fw-normal zz">Weather</h4>
+        </div>
+        <div class="card-body">
+          <img class="normalimg z" src="images/weather.png">
+          <button id="weatherButton" onclick="getWeatherInfo()" type="button" class="w-100 btn btn-lg btn-outline-primary">날씨 정보를 통한 레시피 추천</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="result"></div>
+    <div id="nxny"></div>
+    <div id="pay"></div>
+
+
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+  <script>
+    function getWeatherInfo() {
+      var weatherButton = document.getElementById("weatherButton");
+      weatherButton.style.display = "none";
+
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          var latitude = position.coords.latitude;
+          var longitude = position.coords.longitude;
+
+          var nx = parseInt(latitude, 10);
+          var ny = parseInt(longitude, 10);
+
+          const villageWeatherUrl = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?";
+          const serviceKey = "fKIAUimoXsQG2qWxxgMYaAyeifCXgeEqihWVX2AedUJgd4h%2Bu%2BscaKq3DUSik6vE%2FwbRzFou8nQ4sb7GPX4OBg%3D%3D";
+          const baseDate = moment().format("YYYYMMDD"); 
+          const baseTime = "0800";
+
+          const payload = `serviceKey=${serviceKey}&dataType=json&base_date=${baseDate}&base_time=${baseTime}&nx=${nx}&ny=${ny}`;
+
+          axios.get(villageWeatherUrl + payload)
+            .then(response => {
+              const items = response.data.response.body.items.item;
+
+              let weatherData = {};
+              for (let i = 0; i < items.length; i++) {
+                let item = items[i];
+
+                if (item['category'] === 'TMP') {
+                  let weatherTmp = item['fcstValue'];
+                  let weatherWhat;
+
+                  if (weatherTmp >= 25) {
+                    weatherWhat = '더운';
+                  } else if (weatherTmp <= 5) {
+                    weatherWhat = '추운';
+                  } else {
+                    weatherWhat = '따듯한';
+                  }
+
+                  weatherData['What'] = weatherWhat;
+                }
+
+                if (item['category'] === 'PTY') {
+                  let weatherCode = item['fcstValue'];
+                  let weatherState;
+
+                  switch (weatherCode) {
+                    case '1':
+                      weatherState = '비';
+                      break;
+                    case '2':
+                      weatherState = '비 눈';
+                      break;
+                    case '3':
+                      weatherState = '눈';
+                      break;
+                    case '4':
+                      weatherState = '소나기';
+                      break;
+                    default:
+                      weatherState = '';
+                      break;
+                  }
+
+                  weatherData['State'] = weatherState;
+                }
+              }
+
+              var dataset = weatherData['What'] + ' ' + weatherData['State'];
+              console.log(dataset);
+              performSearch(dataset);
+            })
+            .catch(error => {
+              console.log("날씨 정보 요청 실패: ", error.response?.data);
+            });
+        });
+      } else {
+        console.log("Geolocation을 지원하지 않는 브라우저입니다.");
+      }
+    }
+
+    function performSearch(dataset) {
+      const searchUrl = 'http://localhost:50000/search?dataset=' + dataset;
+
+      axios.get(searchUrl, {
+        headers: {
+          Accept: 'application/json'
+        }
+      })
+        .then(response => {
+          const result = response.data;
+          displayResult(result);
+
+          const linkUrlElements = document.getElementsByClassName("link-url");
+
+          for (let i = 0; i < result.linkUrls.length; i++) {
+            linkUrlElements[i].href = result.linkUrls[i];
+          }
+        })
+        .catch(error => {
+          console.log("검색 요청 실패: ", error.response?.data);
+        });
+    }
+
+    function displayResult(result) {
+        const resultDiv = document.getElementById("result");
+
+        const containerDiv = document.createElement("div");
+        containerDiv.classList.add("result-container");
+
+        result.imageUrls.forEach((imageUrl, index) => {
+            const itemDiv = document.createElement("div");
+            itemDiv.classList.add("item");
+
+            const imageElement = document.createElement("img");
+            imageElement.src = imageUrl;
+            imageElement.width = 200;
+            imageElement.height = 200;
+            itemDiv.appendChild(imageElement);
+
+            if (index < result.text.length) {
+                const textElement = document.createElement("p");
+                textElement.textContent = result.text[index];
+                itemDiv.appendChild(textElement);
+
+                const linkUrlElement = document.createElement("a");
+                linkUrlElement.classList.add("link-url");
+                linkUrlElement.href = result.linkUrls[index]; 
+                linkUrlElement.target = "_blank"; 
+                linkUrlElement.textContent = "레시피 바로가기"; 
+                itemDiv.appendChild(linkUrlElement);
+            }
+
+            containerDiv.appendChild(itemDiv);
+        });
+
+        resultDiv.appendChild(containerDiv);
+    }
+
+  </script>
+
+    <!-- <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script> -->
+
+    <!-- <script>
+      function getWeatherInfo() {
+        var weatherButton = document.getElementById("weatherButton");
+        weatherButton.style.display = "none";
+
+        if ("geolocation" in navigator) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            var latitude = position.coords.latitude;
+            var longitude = position.coords.longitude;
+
+            var nx = parseInt(latitude, 10);
+            var ny = parseInt(longitude, 10);
+
+            const villageWeatherUrl = "http://apis.data.go.kr/1360000/VilageFcstInfoService_2.0/getVilageFcst?";
+            const serviceKey = "fKIAUimoXsQG2qWxxgMYaAyeifCXgeEqihWVX2AedUJgd4h%2Bu%2BscaKq3DUSik6vE%2FwbRzFou8nQ4sb7GPX4OBg%3D%3D";
+            const baseDate = moment().format("YYYYMMDD"); 
+            const baseTime = "0800";
+
+            const payload = `serviceKey=${serviceKey}&dataType=json&base_date=${baseDate}&base_time=${baseTime}&nx=${nx}&ny=${ny}`;
+
+            axios.get(villageWeatherUrl + payload)
+              .then(response => {
+                const items = response.data.response.body.items.item;
+
+                let weatherData = {};
+                for (let i = 0; i < items.length; i++) {
+                  let item = items[i];
+
+                  if (item['category'] === 'TMP') {
+                    let weatherTmp = item['fcstValue'];
+                    let weatherWhat;
+
+                    if (weatherTmp >= 25) {
+                      weatherWhat = '더운';
+                    } else if (weatherTmp <= 5) {
+                      weatherWhat = '추운';
+                    } else {
+                      weatherWhat = '따듯한';
+                    }
+
+                    weatherData['What'] = weatherWhat;
+                  }
+
+                  if (item['category'] === 'PTY') {
+                    let weatherCode = item['fcstValue'];
+                    let weatherState;
+
+                    switch (weatherCode) {
+                      case '1':
+                        weatherState = '비';
+                        break;
+                      case '2':
+                        weatherState = '비 눈';
+                        break;
+                      case '3':
+                        weatherState = '눈';
+                        break;
+                      case '4':
+                        weatherState = '소나기';
+                        break;
+                      default:
+                        weatherState = '';
+                        break;
+                    }
+
+                    weatherData['State'] = weatherState;
+                  }
+                }
+
+
+                var dataset = weatherData['What'] + ' ' + weatherData['State'];
+                console.log(dataset);
+                performSearch(dataset);
+              })
+              .catch(error => {
+                console.log("날씨 정보 요청 실패: ", error.response?.data);
+              });
+          });
+        } else {
+          console.log("Geolocation을 지원하지 않는 브라우저입니다.");
+        }
+      }
+
+      function performSearch(dataset) {
+        var searchUrl = "https://www.10000recipe.com/recipe/list.html?q=" + encodeURIComponent(dataset);
+        window.location.href = searchUrl;
+      }
+    </script> -->
+</body>

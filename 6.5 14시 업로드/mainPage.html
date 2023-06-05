@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>mainPage</title>
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+  </head>
+  <body class="bodycenter">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <div class="mainbox">
+        <div class="maintitle">
+            <div>
+                <img class="yumimg" src="images/yum1.jpg">
+                <h2 class="text-title">Yummiverse</h2>
+            </div>
+            <form class="formmainpage" id="loginForm">
+                <div class="logininput">
+                    <input type="text" name="ID" id="ID" placeholder="ID" class="form-control">
+                    <input type="password" name="password" id="password" placeholder="PW" class="form-control">
+                </div>
+            </form>
+            <h6></h6>
+            <a href="http://localhost:50000/myPage.html"><button type="button" id="login" class="btn btn-primary logininput">Log in</button></a>
+            <h6></h6>
+            <a href="http://localhost:50000/profile.html"><button type="button" class="btn btn-secondary logininput">Sign up</button></a>
+        </div>
+
+    </div>
+    <div class="sharediv">
+      <div class="share">
+        <p class="share-text">사이트 공유</p>
+        <a id="button_Url" class="link-icon url" href="javascript:shareUrl();"></a><!--url복사-->
+        <a id="button_Facebook" class="link-icon facebook" href="javascript:shareFacebook();"></a><!--페이스북-->
+        <a id="button_Twitter" class="link-icon twitter" href="javascript:shareTwitter();"></a><!--트위터-->
+        <a id="button_Band" class="link-icon band" href="javascript:shareBand();"></a><!--밴드-->
+        <a id="button_Line" class="link-icon line" href="javascript:shareLine();"></a><!--라인-->
+    </div>
+    </div>
+    
+  </body>
+  <script>
+    // ID 비번 일치 확인
+  document.addEventListener("DOMContentLoaded", function() {
+    document.getElementById("login").addEventListener("click", checkProfile);
+  });
+
+  function checkProfile(event) {
+      event.preventDefault();
+  
+      // ID, password 정보
+      let ID = document.getElementById("ID").value;
+      let password = document.getElementById("password").value;
+      // ID, password 정보 담은 객체
+      let info = {
+        ID: ID,
+        password: password
+      };
+    
+      // 유저 프로필 정보 담은 객체
+      let user_profile;
+    
+      fetch('/get_user_profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(info)
+      })
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error("유저 프로필 정보 로드 실패");
+          }
+        })
+        .then(data => {
+          user_profile = data;
+          if (user_profile == null) {
+            window.alert("아이디 또는 비밀번호가 일치하지 않습니다.");
+          } else {
+            window.location.href = "http://localhost:50000/myPage.html";
+          }
+        })
+        .catch(error => {
+          console.log("유저 프로필 정보 로드 실패");
+        });
+  }      
+    
+</script>  
+<script>
+  function shareTwitter() {
+      var sendText = "Yummiverse에서 레시피를 공유해준뎅~!~!";
+      var sendUrl = window.document.location.href;  //url에는 현재 주소값을 넣어줌=현재 레시피가 나와있는 주소
+      window.open("https://twitter.com/intent/tweet?text=" + sendText + "&url=" + sendUrl);
+  }
+  
+  function shareFacebook() {
+      var sendUrl = window.document.location.href; //url에는 현재 주소값을 넣어줌=현재 레시피가 나와있는 주소
+      window.open("http://www.facebook.com/sharer/sharer.php?u=" + sendUrl);
+  }
+
+  function shareLine() {
+      var sendUrl = window.document.location.href; //url에는 현재 주소값을 넣어줌=현재 레시피가 나와있는 주소
+      window.open("http://social-plugins.line.me/lineit/share?url=" + sendUrl);
+  }
+
+  function shareBand() {
+      var sendText = "Yummiverse에서 레시피를 공유해준뎅~!~!";
+      var sendUrl = window.document.location.href;  //url에는 현재 주소값을 넣어줌=현재 레시피가 나와있는 주소
+      window.open("http://www.band.us/plugin/share?body=" + sendUrl + "&route=" + sendText);
+  }
+
+
+  function shareUrl(){
+
+      var url = '';
+      var textarea = document.createElement("textarea");  
+      //url 변수 생성 후, textarea라는 변수에 textarea의 요소를 생성
+
+      document.body.appendChild(textarea); //</body> 바로 위에 textarea를 추가(임시 공간이라 위치는 상관 없음)
+      url = window.document.location.href;  //url에는 현재 주소값을 넣어줌
+      textarea.value = url;  // textarea 값에 url를 넣어줌
+      textarea.select();  //textarea를 설정
+      document.execCommand("copy");   // 복사
+      document.body.removeChild(textarea); //extarea 요소를 없애줌
+
+      alert("URL이 복사되었습니다.")  // 알림창
+  }
+
+
+  //https://developers.kakao.com/docs/latest/ko/message/js
+  //https://www.instagram.com/developer/
+  //카카오톡과 인스타그램은 공유하려면 회원가입/어플리케이션등록 절차가 필요합니다
+
+
+
+</script>
+</html>

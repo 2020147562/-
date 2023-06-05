@@ -1,0 +1,18 @@
+{
+  "id": "123",
+  "password": "123",
+  "nickname": "123",
+  "cookingMethods": [
+    "굽기"
+  ],
+  "allergens": [
+    "대두"
+  ],
+  "dietPreferences": [],
+  "mbti": {
+    "riceOrWheat": "wheat",
+    "skillLevel": "high",
+    "isVegeterain": "high",
+    "speed": "fast"
+  }
+}

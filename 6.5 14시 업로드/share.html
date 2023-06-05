@@ -1,0 +1,109 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Yummiverse-share</title>
+        <link rel="stylesheet" type="text/css" href="main.css">
+        <style type = "text/css">
+        </style>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+        rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+
+    </head>
+    <body>
+        <h3 id="recipeName" class="reciperecommendation">레시피 추천</h3><br><br>
+        <div class="share">
+            <p class="share-text">레시피 공유</p>
+            <a id="button_Url" class="link-icon url" href="javascript:shareUrl();"></a><!--url복사-->
+            <a id="button_Facebook" class="link-icon facebook" href="javascript:shareFacebook();"></a><!--페이스북-->
+            <a id="button_Twitter" class="link-icon twitter" href="javascript:shareTwitter();"></a><!--트위터-->
+            <a id="button_Band" class="link-icon band" href="javascript:shareBand();"></a><!--밴드-->
+            <a id="button_Line" class="link-icon line" href="javascript:shareLine();"></a><!--라인-->
+        </div>
+
+
+        <br><br>
+        
+        <!--여기서 리뷰 작성하면 리뷰게시판에 자동으로 연결되어 등록됨-->
+
+        <button onclick="modalOpen('Add')" type="button" class="btn btn-primary">리뷰 작성</button>
+        <div class="modal-backdrop"></div>
+        <div w3-include-html="./modal.html"></div>
+        <script type="text/javascript" src="./board.js"></script>
+
+        <br><br>
+        <a class="reviewgogo" href="http://localhost:50000/reviewPage.html">레시피 리뷰 게시판 보러가기 Click! 👆 </a>
+
+
+
+
+        <script>
+            // fetch('/get_recipeName', {
+            //     method: "POST",
+            //     headers: {
+            //     'Content-Type': 'application/json'
+            //     }
+            // })
+            // .then(response => {
+            //     return response.json();
+            // })
+            // .then(data => {
+            //     let recipe = data.recipeName;
+            //     document.getElementById("recipeName").innerHTML = recipe;
+            // })
+            // .catch(error => {
+            //     console.log(error);
+            // })
+        
+
+            function shareTwitter() {
+                var sendText = "Yummiverse에서 레시피를 공유해준뎅~!~!";
+                var sendUrl = window.document.location.href;  //url에는 현재 주소값을 넣어줌=현재 레시피가 나와있는 주소
+                window.open("https://twitter.com/intent/tweet?text=" + sendText + "&url=" + sendUrl);
+            }
+            
+            function shareFacebook() {
+                var sendUrl = window.document.location.href; //url에는 현재 주소값을 넣어줌=현재 레시피가 나와있는 주소
+                window.open("http://www.facebook.com/sharer/sharer.php?u=" + sendUrl);
+            }
+
+            function shareLine() {
+                var sendUrl = window.document.location.href; //url에는 현재 주소값을 넣어줌=현재 레시피가 나와있는 주소
+                window.open("http://social-plugins.line.me/lineit/share?url=" + sendUrl);
+            }
+
+            function shareBand() {
+                var sendText = "Yummiverse에서 레시피를 공유해준뎅~!~!";
+                var sendUrl = window.document.location.href;  //url에는 현재 주소값을 넣어줌=현재 레시피가 나와있는 주소
+                window.open("http://www.band.us/plugin/share?body=" + sendUrl + "&route=" + sendText);
+            }
+
+
+            function shareUrl(){
+
+                var url = '';
+                var textarea = document.createElement("textarea");  
+                //url 변수 생성 후, textarea라는 변수에 textarea의 요소를 생성
+
+                document.body.appendChild(textarea); //</body> 바로 위에 textarea를 추가(임시 공간이라 위치는 상관 없음)
+                url = window.document.location.href;  //url에는 현재 주소값을 넣어줌
+                textarea.value = url;  // textarea 값에 url를 넣어줌
+                textarea.select();  //textarea를 설정
+                document.execCommand("copy");   // 복사
+                document.body.removeChild(textarea); //extarea 요소를 없애줌
+
+                alert("URL이 복사되었습니다.")  // 알림창
+            }
+
+
+            //https://developers.kakao.com/docs/latest/ko/message/js
+            //https://www.instagram.com/developer/
+            //카카오톡과 인스타그램은 공유하려면 회원가입/어플리케이션등록 절차가 필요합니다
+
+
+
+        </script>
+    </body>
+</html>
